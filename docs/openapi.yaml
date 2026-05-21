@@ -1,0 +1,170 @@
+openapi: 3.0.3
+info:
+  title: Transforma API
+  description: High-performance bidirectional JSON and XML converter engine.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+paths:
+  /api/v1/convert/json-to-xml:
+    post:
+      summary: Convert JSON to XML
+      description: Accepts a raw JSON payload, parses it, and returns its equivalent structured XML document.
+      parameters:
+        - name: root
+          in: query
+          description: The element name of the XML root tag.
+          required: false
+          schema:
+            type: string
+            default: root
+        - name: array_mode
+          in: query
+          description: Mode for representing JSON arrays. 'wrapper' wraps items in a parent container; 'repeating' repeats element tags.
+          required: false
+          schema:
+            type: string
+            enum: [wrapper, repeating]
+            default: wrapper
+        - name: attr_prefix
+          in: query
+          description: A string prefix in JSON keys designating that they should become XML attributes.
+          required: false
+          schema:
+            type: string
+            default: "@"
+        - name: pretty
+          in: query
+          description: Indents the output XML document for readability.
+          required: false
+          schema:
+            type: boolean
+            default: true
+      requestBody:
+        description: Raw JSON document to convert.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+            examples:
+              simple:
+                summary: Simple object
+                value: { "@id": 101, "name": "Go Developer", "skills": ["Go", "Gin"] }
+      responses:
+        '200':
+          description: Successfully converted to XML.
+          content:
+            application/xml; charset=utf-8:
+              schema:
+                type: string
+              example: |
+                <?xml version="1.0" encoding="UTF-8"?>
+                <root id="101">
+                  <name>Go Developer</name>
+                  <skills>
+                    <item>Go</item>
+                    <item>Gin</item>
+                  </skills>
+                </root>
+        '400':
+          description: Invalid request body or parameter errors.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Malformed JSON syntax error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/v1/convert/xml-to-json:
+    post:
+      summary: Convert XML to JSON
+      description: Accepts a raw XML payload, parses its elements/attributes token-by-token, and returns its structured JSON representation.
+      parameters:
+        - name: attr_prefix
+          in: query
+          description: Prefix applied to XML attributes when mapped to JSON keys.
+          required: false
+          schema:
+            type: string
+            default: "@"
+        - name: text_key
+          in: query
+          description: JSON key name under which simple character content is stored when mixed with attributes/children.
+          required: false
+          schema:
+            type: string
+            default: "#text"
+        - name: auto_type
+          in: query
+          description: If enabled, attempts to automatically convert numbers and booleans from XML string literals.
+          required: false
+          schema:
+            type: boolean
+            default: true
+        - name: pretty
+          in: query
+          description: Indents the output JSON document.
+          required: false
+          schema:
+            type: boolean
+            default: true
+      requestBody:
+        description: Raw XML document to convert.
+        required: true
+        content:
+          application/xml:
+            schema:
+              type: string
+            examples:
+              simple:
+                summary: Simple XML
+                value: |
+                  <user id="42">
+                    <name>Jane</name>
+                    <active>true</active>
+                  </user>
+      responses:
+        '200':
+          description: Successfully converted to JSON.
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: object
+              example: |
+                {
+                  "user": {
+                    "@id": 42,
+                    "name": "Jane",
+                    "active": true
+                  }
+                }
+        '400':
+          description: Invalid request body or parameter errors.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '422':
+          description: Malformed XML syntax error.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          description: Detailed explanation of the error.
+          example: "malformed JSON: invalid character 'm' looking for beginning of value"

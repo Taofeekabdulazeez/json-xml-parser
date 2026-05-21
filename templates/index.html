@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transforma | JSON & XML Bidirectional Parser</title>
+    <!-- Google Fonts: Outfit for titles, JetBrains Mono for editor inputs -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome for sleek icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <div class="glass-bg"></div>
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <i class="fa-solid fa-right-left"></i>
+                </div>
+                <div class="logo-text">
+                    <h1>Transforma</h1>
+                    <p>JSON & XML Bidirectional Parser</p>
+                </div>
+            </div>
+            <div class="header-actions">
+                <a href="#api-doc" class="btn btn-secondary btn-sm" id="apiDocBtn">
+                    <i class="fa-solid fa-code"></i> API Docs
+                </a>
+            </div>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="workspace">
+            
+            <!-- Shared Settings Panel (Glassmorphism) -->
+            <section class="settings-panel">
+                <div class="settings-group">
+                    <span class="settings-title"><i class="fa-solid fa-sliders"></i> Parser Settings</span>
+                    
+                    <div class="setting-item">
+                        <label for="rootElement">Root Element:</label>
+                        <input type="text" id="rootElement" value="root" placeholder="root" title="The tag name for the root XML element">
+                    </div>
+                    
+                    <div class="setting-item">
+                        <label for="arrayMode">Array Mode:</label>
+                        <select id="arrayMode" title="How JSON arrays are formatted in XML">
+                            <option value="wrapper" selected>Wrapper Tag (&lt;item&gt;)</option>
+                            <option value="repeating">Repeating Child Tags</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-item">
+                        <label for="attrPrefix">Attr Prefix:</label>
+                        <input type="text" id="attrPrefix" value="@" placeholder="@" title="Prefix to designate XML attributes in JSON">
+                    </div>
+
+                    <div class="setting-item">
+                        <label for="textKey">Text Key:</label>
+                        <input type="text" id="textKey" value="#text" placeholder="#text" title="JSON key for character content in complex XML nodes">
+                    </div>
+
+                    <div class="setting-item checkbox-item">
+                        <input type="checkbox" id="autoType" checked>
+                        <label for="autoType" title="Auto-detect and convert types (numbers, booleans) from XML strings">Auto-Type Convert</label>
+                    </div>
+                    
+                    <div class="setting-item checkbox-item">
+                        <input type="checkbox" id="prettyPrint" checked>
+                        <label for="prettyPrint" title="Format output with indentation">Pretty Print</label>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Editor Split Layout -->
+            <section class="editors-split">
+                
+                <!-- JSON Editor Panel (Left) -->
+                <div class="editor-card" id="jsonCard">
+                    <div class="card-header">
+                        <div class="pane-title">
+                            <i class="fa-brands fa-js json-color"></i>
+                            <span>JSON Data</span>
+                        </div>
+                        <div class="actions">
+                            <button class="btn-icon" id="formatJson" title="Format JSON"><i class="fa-solid fa-align-left"></i></button>
+                            <button class="btn-icon" id="clearJson" title="Clear"><i class="fa-solid fa-trash-can"></i></button>
+                            <button class="btn-icon" id="copyJson" title="Copy to Clipboard"><i class="fa-solid fa-copy"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="editor-wrapper">
+                            <div class="line-numbers" id="jsonLines"></div>
+                            <textarea id="jsonInput" placeholder='{\n  "message": "Type or paste JSON here...",\n  "status": "success",\n  "items": ["Go", "Gin"],\n  "@category": "web"\n}' spellcheck="false"></textarea>
+                        </div>
+                    </div>
+                    <div class="card-footer" id="jsonFooter">
+                        <span class="status-indicator success"><i class="fa-solid fa-check-circle"></i> Ready</span>
+                    </div>
+                </div>
+
+                <!-- Separation Indicator -->
+                <div class="conversion-indicator">
+                    <div class="arrow-container">
+                        <i class="fa-solid fa-angles-right desktop-only"></i>
+                        <i class="fa-solid fa-angles-down mobile-only"></i>
+                    </div>
+                </div>
+
+                <!-- XML Editor Panel (Right) -->
+                <div class="editor-card" id="xmlCard">
+                    <div class="card-header">
+                        <div class="pane-title">
+                            <i class="fa-solid fa-code xml-color"></i>
+                            <span>XML Data</span>
+                        </div>
+                        <div class="actions">
+                            <button class="btn-icon" id="formatXml" title="Format XML"><i class="fa-solid fa-align-left"></i></button>
+                            <button class="btn-icon" id="clearXml" title="Clear"><i class="fa-solid fa-trash-can"></i></button>
+                            <button class="btn-icon" id="copyXml" title="Copy to Clipboard"><i class="fa-solid fa-copy"></i></button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="editor-wrapper">
+                            <div class="line-numbers" id="xmlLines"></div>
+                            <textarea id="xmlInput" placeholder='&lt;root category="web"&gt;\n  &lt;message&gt;Type or paste XML here...&lt;/message&gt;\n  &lt;status&gt;success&lt;/status&gt;\n  &lt;items&gt;\n    &lt;item&gt;Go&lt;/item&gt;\n    &lt;item&gt;Gin&lt;/item&gt;\n  &lt;/items&gt;\n&lt;/root&gt;' spellcheck="false"></textarea>
+                        </div>
+                    </div>
+                    <div class="card-footer" id="xmlFooter">
+                        <span class="status-indicator success"><i class="fa-solid fa-check-circle"></i> Ready</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- API Documentation Modal Drawer -->
+        <div class="modal" id="apiModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2><i class="fa-solid fa-book"></i> Interactive API Documentation</h2>
+                    <button class="close-modal" id="closeModal">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <p>Transforma exposes a direct, high-performance HTTP REST API for bidirectional conversion. You can programmatically access the following endpoints:</p>
+                    
+                    <div class="api-endpoint">
+                        <div class="endpoint-header">
+                            <span class="method post">POST</span>
+                            <span class="path">/api/v1/convert/json-to-xml</span>
+                        </div>
+                        <p class="endpoint-desc">Converts raw JSON payload into structured XML document.</p>
+                        
+                        <h4>Query Parameters:</h4>
+                        <table class="api-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Default</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>root</code></td>
+                                    <td>string</td>
+                                    <td><code>root</code></td>
+                                    <td>Root XML tag name</td>
+                                </tr>
+                                <tr>
+                                    <td><code>array_mode</code></td>
+                                    <td>string</td>
+                                    <td><code>wrapper</code></td>
+                                    <td>Array format: <code>wrapper</code> or <code>repeating</code></td>
+                                </tr>
+                                <tr>
+                                    <td><code>attr_prefix</code></td>
+                                    <td>string</td>
+                                    <td><code>@</code></td>
+                                    <td>Prefix indicating XML attributes in JSON keys</td>
+                                </tr>
+                                <tr>
+                                    <td><code>pretty</code></td>
+                                    <td>boolean</td>
+                                    <td><code>true</code></td>
+                                    <td>Pretty-print indenting output</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <h4>Example Request (curl):</h4>
+                        <pre><code>curl -X POST "http://localhost:8080/api/v1/convert/json-to-xml?root=user&amp;array_mode=wrapper" \
+     -H "Content-Type: application/json" \
+     -d '{"@id": 12, "name": "Alice", "skills": ["Go"]}'</code></pre>
+                    </div>
+
+                    <div class="api-endpoint">
+                        <div class="endpoint-header">
+                            <span class="method post">POST</span>
+                            <span class="path">/api/v1/convert/xml-to-json</span>
+                        </div>
+                        <p class="endpoint-desc">Converts raw XML payload into structured JSON.</p>
+                        
+                        <h4>Query Parameters:</h4>
+                        <table class="api-table">
+                            <thead>
+                                <tr>
+                                    <th>Parameter</th>
+                                    <th>Type</th>
+                                    <th>Default</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>attr_prefix</code></td>
+                                    <td>string</td>
+                                    <td><code>@</code></td>
+                                    <td>Prefix for XML attributes in the output JSON</td>
+                                </tr>
+                                <tr>
+                                    <td><code>text_key</code></td>
+                                    <td>string</td>
+                                    <td><code>#text</code></td>
+                                    <td>JSON key for text node content alongside attributes/children</td>
+                                </tr>
+                                <tr>
+                                    <td><code>auto_type</code></td>
+                                    <td>boolean</td>
+                                    <td><code>true</code></td>
+                                    <td>Parse numeric/boolean values from strings automatically</td>
+                                </tr>
+                                <tr>
+                                    <td><code>pretty</code></td>
+                                    <td>boolean</td>
+                                    <td><code>true</code></td>
+                                    <td>Pretty-print indenting output</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <h4>Example Request (curl):</h4>
+                        <pre><code>curl -X POST "http://localhost:8080/api/v1/convert/xml-to-json?auto_type=true" \
+     -H "Content-Type: application/xml" \
+     -d '&lt;user id="12"&gt;&lt;name&gt;Alice&lt;/name&gt;&lt;skills&gt;&lt;item&gt;Go&lt;/item&gt;&lt;/skills&gt;&lt;/user&gt;'</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer class="app-footer">
+            <p>Made with <i class="fa-solid fa-heart"></i> for Go Developers &bull; Transforma API v1.0.0</p>
+        </footer>
+    </div>
+
+    <!-- Application JavaScript Logic -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
