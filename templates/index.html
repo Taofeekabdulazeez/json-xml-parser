@@ -197,7 +197,7 @@
                         </table>
 
                         <h4>Example Request (curl):</h4>
-                        <pre><code>curl -X POST "http://localhost:8080/api/v1/convert/json-to-xml?root=user&amp;array_mode=wrapper" \
+                        <pre><code>curl -X POST "https://json-xml-parser-m9o2.onrender.com/api/v1/convert/json-to-xml?root=user&amp;array_mode=wrapper" \
      -H "Content-Type: application/json" \
      -d '{"@id": 12, "name": "Alice", "skills": ["Go"]}'</code></pre>
                     </div>
@@ -248,7 +248,7 @@
                         </table>
 
                         <h4>Example Request (curl):</h4>
-                        <pre><code>curl -X POST "http://localhost:8080/api/v1/convert/xml-to-json?auto_type=true" \
+                        <pre><code>curl -X POST "https://json-xml-parser-m9o2.onrender.com/api/v1/convert/xml-to-json?auto_type=true" \
      -H "Content-Type: application/xml" \
      -d '&lt;user id="12"&gt;&lt;name&gt;Alice&lt;/name&gt;&lt;skills&gt;&lt;item&gt;Go&lt;/item&gt;&lt;/skills&gt;&lt;/user&gt;'</code></pre>
                     </div>
